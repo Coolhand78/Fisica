@@ -1,0 +1,114 @@
+
+
+import numpy as np
+import sympy as sym
+import matplotlib.pyplot as plt
+from math import log
+
+# Muestras dato
+xi = np.array([0.78, 0.80, 0.82, 0.84, 0.86, 0.88, 0.90, 0.92])
+fi = np.array([2053.9413, 1844.6480, 1640.5230, 1441.3171, 1246.7989, 1056.7528, 870.9777, 689.2859])
+
+# Selección de las muestras a utilizar para la interpolacion
+
+ini = int(input('Introduce numero del punto inicial [0-7]: '))
+if ini<0 or ini>7:
+    print('El valor debe estar entre 0 y 7')
+    ini = int(input('Introduce numero del punto inicial [0-7]: '))
+    
+fin = int(input('Introduce numero del punto final [0-7]: '))
+if fin < 0 or fin > 7:
+    print('El valor debe estar entre 0 y 7')
+    ini = int(input('Introduce numero del punto inicial [0-7]: '))
+
+x_interpol = float(input('Introduce el valor donde interpolar: '))
+
+
+# Algoritmo de interpolacion de Lagrange
+x = sym.Symbol('x')
+poli=0
+for i in range(ini,fin+1):
+    coef = 1
+    for j  in range(ini, fin+1):
+        if (j!=i):
+            coef = coef*(x-xi[j])/(xi[i]-xi[j])
+    poli = poli + coef*fi[i]
+# Expande el polinomio
+px = poli.expand()
+# para evaluacion numérica
+pxn = sym.lambdify(x,poli)
+    
+# Se grafican los puntos de las muestras y el polinomio de Lagrange
+a = np.min(xi)
+b = np.max(xi)
+puntos = 100
+xi_p = np.linspace(a,b,puntos)
+fi_p = pxn(xi_p)
+
+plt.figure(0)
+plt.title('Interpolación Lagrange')
+plt.xlabel('Relacion entre isótopos C14 y C12')
+plt.ylabel('Años')
+plt.plot(xi,fi,'o', label = 'Puntos')
+plt.plot(xi_p,fi_p, label = 'Polinomio')
+plt.legend()
+plt.show()
+plt.savefig('figura0.png', dpi=300)
+
+# Salida polinimio y valor interpolado
+print(f'\nPolinomio de Lagrange, en bruto:\n{poli}')
+print(f'\nPolinomio de Lagrange:\{px}')
+print(f'\nValor interpolado para t(0.8705) = {(pxn(x_interpol)):.5f} años') 
+
+# Calculo de las ecuaciones de error máximo y mínimo
+psi_max=xi[fin]
+psi_min=xi[ini]
+error=1
+for n in range (ini,fin+1):
+    error = error*(x-xi[n])
+error_min = ((6*5730)/(24*log(2)))*(1/psi_max**4)*error
+error_max = ((6*5730)/(24*log(2)))*(1/psi_min**4)*error
+error_min_exp = error_min.expand()
+error_max_exp = error_max.expand()
+
+#Salida de las ecuaciones de error
+print(f'\nEcuación del error máximo, en bruto:\n{error_max}')
+print(f'\nEcuación del error mínimo, en bruto:\n{error_min}')
+print(f'\nEcuación del error máximo:\n{error_max_exp}')
+print(f'\nEcuación del error mínimo:\n{error_min_exp}')
+error_max_n = sym.lambdify(x, error_max)
+error_min_n = sym.lambdify(x, error_min)
+
+# Calculo del error máx y mín correspondiente al punto de interpolacion
+print (f'\nError máx en {x_interpol}: {abs(error_max_n(x_interpol)):.5f}')
+print (f'\nError mín en {x_interpol}: {abs(error_min_n(x_interpol)):.5f}')
+
+# Calculo del error real de la interpolacion usando la ecuacion de t
+e = (pxn(x_interpol) - (-log(x_interpol)*5730/log(2)))
+print (f'\nEl error real en {x_interpol} es: {abs(e):.5f}')
+
+# Se grafica el error vs ratio
+puntos = 300
+error_xi_p = np.linspace(xi[ini],xi[fin],puntos)
+error_max_fi_p = error_max_n(error_xi_p)
+error_min_fi_p = error_min_n(error_xi_p)
+
+plt.rc('axes', titlesize=8)
+plt.rc('axes', labelsize=8)
+plt.rc('xtick', labelsize=8)
+plt.rc('ytick', labelsize=8)
+plt.rc('legend', fontsize=8)
+
+plt.figure(1)
+plt.title('Error máx y mín vs. ratio de isótopos', fontsize=12)
+plt.xlabel(r'Ratio $\left(\dfrac{14C}{12C}\right)$')
+plt.ylabel('||Error||')
+plt.plot(error_xi_p, abs(error_max_fi_p),'b', label = 'e máximo')
+plt.plot(error_xi_p, abs(error_min_fi_p),'c', label = 'e mínimo')
+plt.plot (x_interpol, abs(e), 'ro', label = f'e real en {x_interpol}')
+plt.legend()
+plt.grid()
+
+plt.show()
+plt.savefig('figura1.png', dpi=300)
+    
