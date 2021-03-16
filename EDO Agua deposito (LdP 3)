@@ -1,0 +1,51 @@
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+
+using namespace std;
+
+const float a = 0.6;
+const double A = atan(1)*4*pow(0.5,2); // area [cm2] del orificio pi*r^2 con r = 0.5 cm
+const double B = atan(1)*4*pow(100,2); //area [cm2] de la base del deposito pi*r^2 con r=100 cm
+const int paso = 1;
+const float g = 980;
+
+double func(double h){
+    return -a*A/B * sqrt(2*g*h);
+}
+
+int main() {
+    //cout << "a = " << a << " A = " << A << " B= " << B << endl;
+    double h = 250.0;
+    double pred;
+
+    ofstream fichero;
+    fichero.open("nivelAgua.txt");
+    fichero << fixed;
+    fichero << setprecision(1);
+
+
+    for(int i=0; i>=0; i++) {
+
+        pred = h + func(h);
+        //cout << "func(h) : " << func(h) << endl;
+        //cout << "Pred: " << pred << endl;
+        h = h + (func(h) + func(pred)) * paso / 2.0;
+        //cout << "h :" << h << endl;
+
+        if (i%600==0){
+            //cout << "En t = " << i/60.0 << " minutos, " << " h = " << h << endl;
+            fichero << i/60.0 << "\t" << h <<endl;
+        }
+
+        if (h <= 0.1){
+              cout << "La condición de finalización (h < 1 mm) se satisface a los " << i << " segundos";
+              break;
+        }
+
+
+    }
+
+    fichero.close();
+    return 0;
+}
