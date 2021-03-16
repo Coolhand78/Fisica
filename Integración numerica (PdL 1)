@@ -1,0 +1,42 @@
+#include <iostream>
+#include <iomanip>
+
+using namespace std;
+
+int N = 10000; //numero de rectangulos usados al integrar
+
+//Definimos la funcion que realiza el calculo numerico de la integral definida
+double inte_num (int m, double a, double b) {
+    double intervalo = (b-a)/N;
+    double x = 0;
+    for (int i=0; i<N-1; i++)
+        x += ((pow(a+i*intervalo,m)+pow(a+(i+1)*intervalo,m))/2)*intervalo;
+    return x;
+}
+//Definimos la funcion que calcula el valor analitico de la integral definida
+double inte_analitica (int m, double a, double b) {
+    return (pow(b, m + 1) - pow(a, m + 1)) / (m + 1);
+}
+// Funcion principal
+int main() {
+    int m;
+    double a, b;
+    cout << "Introduzca los valores de m, a y b separados por un espacio" << endl;
+    cin >> m >> a >> b;
+    cout << "Ha introducido m: " << m << " a: " << a << " y b: " << b << endl;
+
+    if (a >= b)
+        cout << "ERROR: a debe ser menor que b!";
+    else if (m <= 0)
+        cout << "ERROR: m debe ser un entero mayor que 0!";
+    else {
+
+        double nume = inte_num(m, a, b);
+        double ana = inte_analitica(m, a, b);
+        cout << scientific << setprecision(10) << "\nEl valor estimado (calculo numérico) de la integral"
+                                                  " es: " << nume << endl;
+        cout << "El valor calculado (analíticamente) de la integral es: " << ana << endl;
+        cout << "Y la diferencia entre ambos es :" << ana-nume << endl;
+    }
+    return 0;
+}
