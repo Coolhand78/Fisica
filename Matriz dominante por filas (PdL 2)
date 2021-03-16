@@ -1,0 +1,135 @@
+#include <iostream>
+#include <cmath>
+
+const int N=4;
+double A[N][N];
+int marcador = 0;  // variable auxiliar que sera usada mas adelante
+
+
+// Se define una función que permuta las los columnas introducidas como parametros: c1, c2
+void permuta(int c1, int c2) {
+    double AUX[N];
+    for (int f=0; f<N; f++) {
+        AUX[f] = A[f][c1];
+        A[f][c1] = A[f][c2];
+        A[f][c2] = AUX[f];
+    }
+}
+
+
+// Se define una función que escribe la matriz A por consola
+void muestraA() {
+    for (int f=0; f<N; f++){
+        for (int c=0; c<N; c++){
+            std::cout << A[f][c] << '\t';
+        }
+        std::cout << std::endl;
+    }
+}
+
+void comprobar() {
+    int cont_aux = 0;
+    double check;
+    for (int i=0 ; i<N ; i++){
+        check = 0.0;
+        for (int j=0; j<N; j++) {
+            if (j != i) {
+                check = check + abs(A[i][j]);
+            }
+        }
+        if (abs(A[i][i]) > check)
+            cont_aux++;
+    }
+
+    if (cont_aux == N) {
+        std::cout << "Mediante permutaciones de columnas se consigue la siguiente matriz con "
+                     "diagonal estrictamente dominante por filas" << std::endl;
+        muestraA();
+    }
+    else {
+        std::cout << "Lo siento, no es posible mediante permutaciones de las columnas conseguir una "
+                     "matriz con diagonal estrictamente dominante por filas" << std::endl;
+    }
+
+
+}
+
+int main() {
+// Bucle de entrada de datos de la matriz
+    std::cout << "Introduzca de uno en uno los elementos de A (por filas)" << std::endl;
+    for (int f=0; f<N; f++){
+        for (int c=0; c<N; c++){
+            std::cin >> A[f][c];
+        }
+    }
+
+
+// Los bucles siguientes calculan la suma de elementos de cada fila (excepto el elemento de la diagonal)
+// y la compara con el valor del elemento de la diagonal. Si este es mayor, incrementa el contador count_aux
+// Finalmente un if comprueba si el contador ha llegado a 4 (1 por cada fila) y si es asi, saca por consola
+// el mensaje indicando que la matriz es dominante por filas
+
+
+    int cont_aux = 0;
+    double check;
+    for (int i=0 ; i<N ; i++){
+        check = 0.0;
+        for (int j=0; j<N; j++) {
+            if (j != i) {
+                check = check + abs(A[i][j]);
+            }
+        }
+        if (abs(A[i][i]) > check)
+            cont_aux++;
+        }
+
+    if (cont_aux == N) {
+        std::cout << "La matriz introducida es con diagonal estrictamente dominante por filas" << std::endl;
+        exit(0);
+    }
+    else {
+        for (int f = 0; f < N; f++) {
+            int r = 0;
+            int pos = 0;
+            for (int c = 0; c < N; c++) {
+                if (abs(A[f][c]) > r) {
+                    r = abs(A[f][c]);
+                    pos = c;
+                }
+            }
+
+
+            if (pos > f) {
+                permuta(pos, f);
+            }
+
+            if (pos < f) {
+                marcador = 1;
+            }
+        }
+
+        //Compruebo despues de permutar que se cumple la condicion
+        cont_aux = 0;
+        for (int i = 0; i < N; i++) {
+            check = 0.0;
+            for (int j = 0; j < N; j++) {
+                if (j != i) {
+                    check = check + abs(A[i][j]);
+                }
+            }
+            if (abs(A[i][i]) > check)
+                cont_aux++;
+        }
+
+        if (cont_aux == N) {
+            std::cout << "La matriz introducida se ha podido convertir en la siguiente matriz con diagonal\n "
+                         "estrictamente dominante por filas mediante permutaciones de columnas:\n" << std::endl;
+            muestraA();
+        }
+        if (marcador ==1 || cont_aux != N)
+            std::cout << "Lo siento, no es posible mediante permutaciones de las columnas conseguir una "
+                         "matriz con diagonal estrictamente dominante por filas" << std::endl;
+    }
+
+    return 0;
+    }
